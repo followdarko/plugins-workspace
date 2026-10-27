@@ -317,6 +317,17 @@ export async function fetch(
     statusText
   })
 
+  return decorateResponse(res, url, responseHeaders)
+}
+
+// Kept out of `fetch` so the `clone` override does not share a scope with the
+// body stream's callbacks: WebKit never frees a stream whose source can reach
+// its own `Response`, so every response would leak.
+function decorateResponse(
+  res: Response,
+  url: string,
+  responseHeaders: Array<[string, string]>
+): Response {
   // `Response.url` cannot be set via the constructor, so we define it manually
   Object.defineProperty(res, 'url', { value: url, writable: false })
 
